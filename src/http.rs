@@ -14,8 +14,8 @@ use axum::{Json, Router};
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD as BASE64_STANDARD;
 use fred::prelude::ClientLike;
-use rand::TryRngCore;
-use rand::rngs::OsRng;
+use rand::TryRng;
+use rand::rngs::SysRng;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::net::SocketAddr;
@@ -133,7 +133,10 @@ fn build_router(
 
     let router = router
         .layer(ConcurrencyLimitLayer::new(1024))
-        .layer(TimeoutLayer::new(Duration::from_secs(15)))
+        .layer(TimeoutLayer::with_status_code(
+            StatusCode::REQUEST_TIMEOUT,
+            Duration::from_secs(15),
+        ))
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
@@ -921,14 +924,14 @@ fn generate_token(length: usize) -> String {
         return String::new();
     }
 
-    let mut rng = OsRng;
     let alphabet_len = ALPHANUMERIC.len() as u32;
     let max_multiple = ((u32::from(u8::MAX) + 1) / alphabet_len) * alphabet_len; // largest multiple <= 256
     let mut token = String::with_capacity(length);
     let mut bytes = vec![0u8; length];
+    let mut rng = SysRng;
 
     while token.len() < length {
-        rng.try_fill_bytes(&mut bytes)
+        rng.try_fill_bytes(bytes.as_mut_slice())
             .expect("operating system RNG unavailable");
         for &byte in &bytes {
             let value = u32::from(byte);

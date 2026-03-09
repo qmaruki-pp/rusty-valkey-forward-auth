@@ -1,4 +1,4 @@
-FROM rust:1.90-slim AS backend-build
+FROM rust:1.94-slim AS backend-build
 
 WORKDIR /srv/app
 
