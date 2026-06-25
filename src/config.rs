@@ -31,6 +31,10 @@ pub(crate) struct RVFAConfig {
     #[config(env = "VALKEY_PASSWORD")]
     pub valkey_password: Option<String>,
 
+    /// Valkey database
+    #[config(env = "VALKEY_DATABASE_ID", default = 0)]
+    pub valkey_database_id: u8,
+
     /// Token hashing salt (32 bytes hex-encoded, 64 characters). Used as the keyed blake3 salt.
     /// IMPORTANT: Keep this secret and consistent across deployments.
     #[config(env = "TOKEN_SALT")]

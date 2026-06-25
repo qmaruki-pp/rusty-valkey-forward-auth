@@ -27,6 +27,7 @@ pub(crate) async fn client_from_config(config: &RVFAConfig) -> Result<fred::clie
     if let Some(password) = &config.valkey_password {
         valkey_config.password = Some(password.clone());
     }
+    valkey_config.database = Some(config.valkey_database_id);
     let client = Builder::from_config(valkey_config)
         .with_connection_config(|connection_config| {
             connection_config.connection_timeout = Duration::from_secs(5);
